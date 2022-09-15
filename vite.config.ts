@@ -1,6 +1,7 @@
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
+import glsl from "vite-plugin-glsl";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,7 +17,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [basicSsl()],
+  plugins: [basicSsl(), glsl()],
   root: "src",
   server: {
     https: true,
