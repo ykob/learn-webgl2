@@ -1,13 +1,20 @@
+import { resolve } from "path";
+import { defineConfig } from "vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 
-export default {
+export default defineConfig({
   build: {
-    outDir: "../dist",
+    outDir: "./dist",
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "src/index.html"),
+        nested: resolve(__dirname, "src/nested/index.html"),
+      },
+    },
   },
   plugins: [basicSsl()],
-  public: "public",
   root: "src",
   server: {
     https: true,
   },
-};
+});
