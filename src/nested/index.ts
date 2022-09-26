@@ -6,6 +6,9 @@ const canvas = document.querySelector<HTMLCanvasElement>("#canvas-webgl");
 const gl = canvas!.getContext("webgl2");
 const program = gl!.createProgram();
 
+// VAO
+const vao = gl?.createVertexArray();
+
 // variables of Square
 const squareVertexBuffer = gl!.createBuffer();
 const squareIndicesBuffer = gl!.createBuffer();
@@ -15,7 +18,7 @@ const vertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
 const indices = [0, 1, 2, 0, 2, 3];
 const verticesArray = new Float32Array(vertices);
 const indicesArray = new Uint16Array(indices);
-let aVertexPosition: number | null = null
+let aVertexPosition: number | null = null;
 
 const resizeCanvas = () => {
   const width = canvasWrap!.clientWidth;
@@ -25,39 +28,63 @@ const resizeCanvas = () => {
 
 const initProgram = () => {
   if (!gl || !program || !squareVertexShader || !squareFragmentShader) return;
+
+  // Prepare for Vertex Shader
   gl.shaderSource(squareVertexShader, vs);
   gl.compileShader(squareVertexShader);
+  gl.attachShader(program, squareVertexShader);
+
+  // Prepare for Fragment Shader
   gl.shaderSource(squareFragmentShader, fs);
   gl.compileShader(squareFragmentShader);
-  gl.attachShader(program, squareVertexShader);
   gl.attachShader(program, squareFragmentShader);
+
   gl.linkProgram(program);
   gl.useProgram(program);
+
+  // Get attribute index number
   aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
 };
 
 const initBuffers = () => {
-  if (!gl || !squareVertexBuffer || !squareIndicesBuffer) return;
+  if (
+    !gl ||
+    !vao ||
+    !squareVertexBuffer ||
+    !squareIndicesBuffer ||
+    aVertexPosition === null
+  )
+    return;
+
+  gl.bindVertexArray(vao);
+
+  // Prepare for VBO
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(aVertexPosition);
+  gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+
+  // Prepare for IBO
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndicesBuffer);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesArray, gl.STATIC_DRAW);
+
+  // Clear
+  gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 };
 
 const update = () => {
-  if (!gl) return;
+  if (!gl || !vao) return;
+
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
-  if (aVertexPosition !== null) {
-    gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(aVertexPosition);
-  }
+  gl.bindVertexArray(vao);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndicesBuffer);
   gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+  // Clear
+  gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
