@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import vs from "./glsl/square.vs";
 import fs from "./glsl/square.fs";
 
@@ -5,6 +6,10 @@ const canvasWrap = document.querySelector<HTMLDivElement>("#canvas-wrap");
 const canvas = document.querySelector<HTMLCanvasElement>("#canvas-webgl");
 const gl = canvas!.getContext("webgl2");
 const program = gl!.createProgram();
+
+const cameraMatrix = mat4.create();
+const modelViewMatrix = mat4.create();
+const projectionMatrix = mat4.create();
 
 // VAO
 const vao = gl?.createVertexArray();
